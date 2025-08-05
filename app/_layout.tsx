@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import * as Sentry from '@sentry/react-native';
+import { useAuthStore } from "@/store/auth.store";
 
 Sentry.init({
   dsn: 'https://1a685f5d3d4a440b5458db5a50193125@o4509759516114944.ingest.us.sentry.io/4509764969562112',
@@ -23,6 +24,8 @@ Sentry.init({
 
 export default Sentry.wrap(function RootLayout() {
 
+  const {isLoading, fetchAuthenticatedUser} = useAuthStore();
+
   const [fontLoaded, error] = useFonts({
     "QuickSand-Bold": require("../assets/fonts/Quicksand-Bold.ttf"),
     "QuickSand-Medium": require("../assets/fonts/Quicksand-Medium.ttf"),
@@ -36,7 +39,11 @@ export default Sentry.wrap(function RootLayout() {
     if (fontLoaded) SplashScreen.hideAsync();
   }, [fontLoaded, error]);
 
-  if (!fontLoaded) {
+  useEffect(() => {
+    fetchAuthenticatedUser();
+  }, [])
+
+  if (!fontLoaded || isLoading) {
     return null;  // Don't render anything until fonts are ready
   }
 
